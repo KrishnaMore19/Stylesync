@@ -1,0 +1,65 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+model ScrapedSite {
+  id               String         @id @default(cuid())
+  url              String
+  title            String?
+  favicon          String?
+  rawHtmlSnapshot  String?        @db.Text
+  extractionStatus String         @default("pending") // pending | processing | completed | failed
+  errorMessage     String?
+  createdAt        DateTime       @default(now())
+  updatedAt        DateTime       @updatedAt
+  designTokens     DesignToken[]
+
+  @@map("scraped_sites")
+}
+
+model DesignToken {
+  id           String       @id @default(cuid())
+  siteId       String
+  site         ScrapedSite  @relation(fields: [siteId], references: [id], onDelete: Cascade)
+  sessionId    String       @default("default")
+  colors       Json         @default("{}")
+  typography   Json         @default("{}")
+  spacing      Json         @default("{}")
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
+  lockedTokens LockedToken[]
+  versionHistory VersionHistory[]
+
+  @@map("design_tokens")
+}
+
+model LockedToken {
+  id           String      @id @default(cuid())
+  tokenId      String
+  designToken  DesignToken @relation(fields: [tokenId], references: [id], onDelete: Cascade)
+  tokenPath    String      // e.g., "colors.primary", "typography.headingFont"
+  lockedValue  Json
+  createdAt    DateTime    @default(now())
+
+  @@unique([tokenId, tokenPath])
+  @@map("locked_tokens")
+}
+
+model VersionHistory {
+  id          String      @id @default(cuid())
+  tokenId     String
+  designToken DesignToken @relation(fields: [tokenId], references: [id], onDelete: Cascade)
+  tokenPath   String
+  beforeValue Json
+  afterValue  Json
+  changedBy   String      @default("user")
+  createdAt   DateTime    @default(now())
+
+  @@map("version_history")
+}
