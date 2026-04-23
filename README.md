@@ -2,8 +2,6 @@
 
 > Transform any website into an interactive, living design system.
 
-**Purple Merit Technologies — Full Stack Vibe Coder Intern Assessment**
-
 ---
 
 ## Overview
@@ -286,6 +284,3 @@ Make sure you're using the Playwright Docker image as your base.
 
 ---
 
-## License
-
-Built for Purple Merit Technologies assessment. Not for commercial use.
